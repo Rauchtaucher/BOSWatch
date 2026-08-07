@@ -12,7 +12,7 @@ function exitcodefunction {
     echo "Action: $action on $module failed."
     echo "Exitcode: $errorcode"
     echo ""
-    echo " -> If you want to open an issue at https://github.com/Schrolli91/BOSWatch/issues"
+    echo " -> If you want to open an issue at https://github.com/Rauchtaucher/BOSWatch/issues"
     echo "    please post the logfile, located at $boswatch_install_path/setup_log.txt"
     exit 1
   else
@@ -119,9 +119,9 @@ echo "-> download BOSWatch..................."
 cd $boswatchpath/
 
 case $branch in
-  "dev") git clone -b develop https://github.com/Schrolli91/BOSWatch . >> $boswatch_install_path/setup_log.txt 2>&1 && \
+  "dev") git clone -b develop https://github.com/Rauchtaucher/BOSWatch . >> $boswatch_install_path/setup_log.txt 2>&1 && \
     exitcodefunction $? git-clone BOSWatch-develop ;;
-  *) git clone -b master https://github.com/Schrolli91/BOSWatch . >> $boswatch_install_path/setup_log.txt 2>&1 && \
+  *) git clone -b master https://github.com/Rauchtaucher/BOSWatch . >> $boswatch_install_path/setup_log.txt 2>&1 && \
     exitcodefunction $? git-clone BOSWatch ;;
 esac
 
@@ -199,7 +199,7 @@ echo "[9/9] [#########]"
 tput cup 15 5
 echo "-> configure..........................."
 cd $boswatchpath/
-echo $'# BOSWatch - blacklist the DVB drivers to avoid conflicts with the SDR driver\n blacklist dvb_usb_rtl28xxu \n blacklist rtl2830\n blacklist dvb_usb_v2\n blacklist dvb_core' >> /etc/modprobe.d/boswatch_blacklist_sdr.conf
+echo $'# BOSWatch - blacklist the DVB drivers to avoid conflicts with the SDR driver\n blacklist dvb_usb_rtl28xxu \n blacklist rtl2830\n blacklist dvb_usb_v2\n blacklist dvb_core' >> /etc/modprobe.d/blacklist-dvb.conf
 
 # Installation is ready
 tput cup 17 1
