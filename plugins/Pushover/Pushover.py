@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 
 """
@@ -10,8 +10,8 @@ Pushover-Plugin to send FMS-, ZVEI- and POCSAG - messages to Pushover Clients
 """
 
 import logging  # Global logger
-import httplib  # for the HTTP request
-import urllib
+import http.client  # for the HTTP request
+import urllib.parse
 from includes import globalVars  # Global variables
 
 # from includes.helper import timeHandler
@@ -62,67 +62,57 @@ def run(typ, freq, data):
         if configHandler.checkConfig("Pushover"):  # read and debug the config
 
             if typ == "FMS":
-                #
-                # building message for FMS
-                #
-
                 message = globalVars.config.get("Pushover", "fms_message")
                 title = globalVars.config.get("Pushover", "fms_title")
                 priority = globalVars.config.get("Pushover", "fms_prio")
                 logging.debug("Sending message: %s", message)
 
             elif typ == "ZVEI":
-                #
-                # building message for ZVEI
-                #
                 if globalVars.config.get("Pushover", "zvei_sep_prio") == '1':
-			if data["zvei"] in globalVars.config.get("Pushover", "zvei_prio2"):
-				priority = '2'
-			elif data["zvei"] in globalVars.config.get("Pushover","zvei_prio1"):
-				priority = '1'
-			elif data["zvei"] in globalVars.config.get("Pushover","zvei_prio0"):
-				priority = '0'
-			else:
-				priority = '-1'
-		else:
-			priority = globalVars.config.get("Pushover","zvei_std_prio")
+                    if data["zvei"] in globalVars.config.get("Pushover", "zvei_prio2"):
+                        priority = '2'
+                    elif data["zvei"] in globalVars.config.get("Pushover", "zvei_prio1"):
+                        priority = '1'
+                    elif data["zvei"] in globalVars.config.get("Pushover", "zvei_prio0"):
+                        priority = '0'
+                    else:
+                        priority = '-1'
+                else:
+                    priority = globalVars.config.get("Pushover", "zvei_std_prio")
 
                 message = globalVars.config.get("Pushover", "zvei_message")
                 title = globalVars.config.get("Pushover", "zvei_title")
                 logging.debug("Sending message: %s", message)
 
             elif typ == "POC":
-
-                #
-                # Pushover-Request
-                #
                 logging.debug("send Pushover for %s", typ)
                 if globalVars.config.get("Pushover", "poc_spec_ric") == '0':
-			if data["function"] == '1':
-                        	priority = globalVars.config.get("Pushover", "SubA")
-                    	elif data["function"] == '2':
-                        	priority = globalVars.config.get("Pushover", "SubB")
-                    	elif data["function"] == '3':
-	                        priority = globalVars.config.get("Pushover", "SubC")
-        	        elif data["function"] == '4':
-                	        priority = globalVars.config.get("Pushover", "SubD")
-                    	else:
-                        	priority = 0
+                    if data["function"] == '1':
+                        priority = globalVars.config.get("Pushover", "SubA")
+                    elif data["function"] == '2':
+                        priority = globalVars.config.get("Pushover", "SubB")
+                    elif data["function"] == '3':
+                        priority = globalVars.config.get("Pushover", "SubC")
+                    elif data["function"] == '4':
+                        priority = globalVars.config.get("Pushover", "SubD")
+                    else:
+                        priority = 0
                 else:
-                    	if data["ric"] in globalVars.config.get("Pushover", "poc_prio2"):
-                        	priority = 2
-			elif data["ric"] in globalVars.config.get("Pushover","poc_prio1"):
-			        priority = 1
-                    	elif data["ric"] in globalVars.config.get("Pushover","poc_prio0"):
-			        priority = 0
-			else:
-				priority = -1
-                        
+                    if data["ric"] in globalVars.config.get("Pushover", "poc_prio2"):
+                        priority = 2
+                    elif data["ric"] in globalVars.config.get("Pushover", "poc_prio1"):
+                        priority = 1
+                    elif data["ric"] in globalVars.config.get("Pushover", "poc_prio0"):
+                        priority = 0
+                    else:
+                        priority = -1
+
                 message = globalVars.config.get("Pushover", "poc_message")
                 title = globalVars.config.get("Pushover", "poc_title")
 
             else:
                 logging.warning("Invalid type: %s", typ)
+                return
 
             try:
                 # replace the wildcards
@@ -131,12 +121,12 @@ def run(typ, freq, data):
                 sound = globalVars.config.get("Pushover", "sound")
                 # set Default-Sound
                 if not sound:
-                        sound = "pushover"
+                    sound = "pushover"
 
                 # start the connection
-                conn = httplib.HTTPSConnection("api.pushover.net:443")
+                conn = http.client.HTTPSConnection("api.pushover.net:443")
                 conn.request("POST", "/1/messages.json",
-                             urllib.urlencode({
+                             urllib.parse.urlencode({
                                  "token": globalVars.config.get("Pushover", "api_key"),
                                  "user": globalVars.config.get("Pushover", "user_key"),
                                  "message": message,
@@ -170,7 +160,7 @@ def run(typ, freq, data):
             finally:
                 logging.debug("close Pushover-Connection")
                 try:
-                    request.close()
+                    conn.close()
                 except:
                     pass
 

@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 
 """
@@ -10,10 +10,10 @@ Functions to Load and import the Plugins
 """
 
 import logging # Global logger
-import imp
+import importlib.util
 import os
 
-from ConfigParser import NoOptionError # we need this exception
+from configparser import NoOptionError # we need this exception
 from includes import globalVars  # Global variables
 
 def loadPlugins():
@@ -54,7 +54,7 @@ def loadPlugins():
 
 def getPlugins():
 	"""
-	get a Python Dict of all activeated plugins
+	get a Python Dict of all activated plugins
 
 	@return:    plugins as Python Dict
 	@exception: Exception if plugin search failed
@@ -74,8 +74,8 @@ def getPlugins():
 			# is the plugin enabled in the config-file?
 			try:
 				if globalVars.config.getint("Plugins", i):
-					info = imp.find_module(i, [location])
-					plugins.append({"name": i, "info": info})
+					plugin_path = os.path.join(location, i + ".py")
+					plugins.append({"name": i, "path": plugin_path})
 					logging.debug("Plugin [ENABLED ] %s", i)
 				else:
 					logging.debug("Plugin [DISABLED] %s ", i)
@@ -97,13 +97,15 @@ def loadPlugin(plugin):
 	@type    plugin: plugin Data
 	@param   plugin: Contains the information to import a plugin
 
-
-	@return:    nothing
+	@return:    module
 	@exception: Exception if plugin import failed
 	"""
 	try:
 		logging.debug("load plugin: %s", plugin["name"])
-		return imp.load_module(plugin["name"], *plugin["info"])
+		spec = importlib.util.spec_from_file_location(plugin["name"], plugin["path"])
+		module = importlib.util.module_from_spec(spec)
+		spec.loader.exec_module(module)
+		return module
 	except:
 		logging.error("cannot load plugin: %s", plugin["name"])
 		logging.debug("cannot load plugin: %s", plugin["name"], exc_info=True)

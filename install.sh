@@ -25,7 +25,7 @@ tput clear
 tput civis
 echo "     ____  ____  ______       __      __       __   "
 echo "    / __ )/ __ \/ ___/ |     / /___ _/ /______/ /_  "
-echo "   / __  / / / /\__ \| | /| / / __  / __/ ___/ __ \ "
+echo "   / __  / / / /\__ \| | /| / / __ \`/ __/ ___/ __ \ "
 echo "  / /_/ / /_/ /___/ /| |/ |/ / /_/ / /_/ /__/ / / / "
 echo " /_____/\____//____/ |__/|__/\__,_/\__/\___/_/ /_/  "
 echo "            German BOS Information Script           "
@@ -108,7 +108,7 @@ tput cup 13 15
 echo "[ 2/9] [##-------]"
 tput cup 15 5
 echo "-> download GIT and other stuff.........."
-apt-get -y install git cmake build-essential libusb-1.0 qt4-qmake qt4-default libpulse-dev libx11-dev sox python-pip >> $boswatch_install_path/setup_log.txt 2>&1
+apt-get -y install git cmake build-essential libusb-1.0-0-dev libpulse-dev libx11-dev sox python3 python3-pip python3-venv >> $boswatch_install_path/setup_log.txt 2>&1
 exitcodefunction $? download stuff
 
 # download BOSWatch via git
@@ -125,17 +125,17 @@ case $branch in
     exitcodefunction $? git-clone BOSWatch ;;
 esac
 
-# Download RTL-SDR
+# Download RTL-SDR (upstream osmocom)
 tput cup 13 15
 echo "[ 4/9] [####-----]"
 tput cup 15 5
 echo "-> download rtl_fm......................"
 cd $boswatch_install_path
-git clone https://github.com/Schrolli91/rtl-sdr.git >> $boswatch_install_path/setup_log.txt 2>&1
+git clone https://gitea.osmocom.org/sdr/rtl-sdr.git >> $boswatch_install_path/setup_log.txt 2>&1
 exitcodefunction $? git-clone rtl-sdr
 cd rtl-sdr/
 
-# Compie RTL-FM
+# Compile RTL-FM
 tput cup 13 15
 echo "[ 5/9] [#####----]"
 tput cup 15 5
@@ -154,40 +154,43 @@ ldconfig >> $boswatch_install_path/setup_log.txt 2>&1
 exitcodefunction $? ldconfig rtl-sdr
 
 
-# Download Multimon-NG
+# Download Multimon-NG (upstream EliasOenal, cmake-based, no Qt required)
 tput cup 13 15
 echo "[ 6/9] [######---]"
 tput cup 15 5
 echo "-> download multimon-ng................"
 cd $boswatch_install_path
-git clone https://github.com/Schrolli91/multimon-ng.git multimonNG >> $boswatch_install_path/setup_log.txt 2>&1
+git clone https://github.com/EliasOenal/multimon-ng.git multimonNG >> $boswatch_install_path/setup_log.txt 2>&1
 exitcodefunction $? git-clone multimonNG
 
 cd $boswatch_install_path/multimonNG/
 
-# Compile Multimon-NG
+# Compile Multimon-NG (cmake-based)
 tput cup 13 15
 echo "[ 7/9] [#######--]"
 tput cup 15 5
 echo "-> compile multimon-ng................."
 mkdir -p build
 cd build
-qmake ../multimon-ng.pro >> $boswatch_install_path/setup_log.txt 2>&1
-exitcodefunction $? qmake multimonNG
+cmake .. >> $boswatch_install_path/setup_log.txt 2>&1
+exitcodefunction $? cmake multimonNG
 
 make >> $boswatch_install_path/setup_log.txt 2>&1
 exitcodefunction $? make multimonNG
 
 make install >> $boswatch_install_path/setup_log.txt 2>&1
-exitcodefunction $? qmakeinstall multimonNG
+exitcodefunction $? make-install multimonNG
 
-# Download & Install MySQL-Connector for Python via pip
+# Install MySQL-Connector for Python in a virtual environment
+# (required on Debian bookworm due to PEP 668 externally-managed-environment)
 tput cup 13 15
 echo "[ 8/9] [########-]"
 tput cup 15 5
-echo "-> Download & Install MySQL connector for Python."
-cd $boswatch_install_path
-pip install mysql-connector-python >> $boswatch_install_path/setup_log.txt 2>&1
+echo "-> Install MySQL connector for Python in venv."
+cd $boswatchpath
+python3 -m venv venv >> $boswatch_install_path/setup_log.txt 2>&1
+exitcodefunction $? create-venv boswatch
+venv/bin/pip install mysql-connector-python >> $boswatch_install_path/setup_log.txt 2>&1
 exitcodefunction $? install mysql-connector
 
 # Blacklist DVB-Drivers
@@ -207,6 +210,8 @@ echo "Watch out: to run BOSWatch you have to modify the config.ini!"
 echo "Do the following step to do so:"
 echo "sudo nano $boswatchpath/config/config.ini"
 echo "and modify the config as you need. This step is optional if you are upgrading an old version of BOSWatch. "
+echo ""
+echo "To run BOSWatch use: python3 $boswatchpath/boswatch.py ..."
 
 tput cnorm
 
