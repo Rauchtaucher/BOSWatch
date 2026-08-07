@@ -7,7 +7,7 @@ echo $module
 # ----------------------------------------------------------------------------------------------------------------------------------
 if [ $module == "base" ]; then
   cp $bospath/config/config.template.ini $bospath/config/config.ini
-  sudo /usr/bin/python $bospath/boswatch.py -f 1 -d 0 -e 10 -a POC512 POC1200 POC2400 -v -t
+  sudo python3 $bospath/boswatch.py -f 1 -d 0 -e 10 -a POC512 POC1200 POC2400 -v -t
 
   sudo chmod 777 $bospath/log/boswatch.log
   if grep -Fxq '\[ERROR' "$bospath/log/boswatch.log"
@@ -30,7 +30,7 @@ elif [ $module == "mysql" ]; then
   sudo mysql -e "\. plugins/MySQL/boswatch.sql"
   #sudo mysql boswatch < plugins/MySQL/boswatch.sql
 
-  sudo /usr/bin/python $bospath/boswatch.py -f 1 -d 0 -e 10 -a POC512 POC1200 POC2400 -v -t
+  sudo python3 $bospath/boswatch.py -f 1 -d 0 -e 10 -a POC512 POC1200 POC2400 -v -t
   sudo chmod 777 $bospath/log/boswatch.log
 
   if grep -Fxq '\[ERROR' "$bospath/log/boswatch.log"
@@ -68,7 +68,7 @@ elif [ $module == "mysql" ]; then
 # ----------------------------------------------------------------------------------------------------------------------------------
 elif [ $module == "httpRequest" ]; then
   sudo cp citest/config.httpRequest.ini $bospath/config/config.ini
-  sudo /usr/bin/python $bospath/boswatch.py -f 1 -d 0 -e 10 -a POC512 POC1200 POC2400 -v -t
+  sudo python3 $bospath/boswatch.py -f 1 -d 0 -e 10 -a POC512 POC1200 POC2400 -v -t
 
   sudo chmod 777 $bospath/log/boswatch.log
   if grep -Fxq '\[ERROR' "$bospath/log/boswatch.log"

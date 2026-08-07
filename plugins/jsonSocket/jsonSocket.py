@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 
 """
@@ -87,7 +87,7 @@ def run(typ,freq,data):
 					logging.debug("Start %s to %s", typ, globalVars.config.get("jsonSocket", "protocol"))
 					try:
 						# dump data to json-string
-						sendData = json.dumps(data)
+						sendData = json.dumps(data).encode('utf-8')
 						# send data
 						sock.sendto(sendData, (globalVars.config.get("jsonSocket", "server"), globalVars.config.getint("jsonSocket", "port")))
 					except:
