@@ -13,15 +13,15 @@ import logging
 #
 # local helper function to decode a string...
 #
-def decodeString(inputString = ""):
+def decodeString(inputString = b""):
 	"""
-	Returns given string as unicode
+	Returns given bytes decoded as str (unicode)
 
-	@type    string: String
-	@param   string: String to convert to unicode
+	@type    inputString: bytes
+	@param   inputString: bytes to convert to str
 
-	@return:    string in unicode
-	@exception: Exception if converting to unicode failed
+	@return:    string decoded to str
+	@exception: Exception if decoding failed
 	"""
 	decodedString = ""
 	logging.debug("call decodeString('%s')", inputString)
@@ -44,13 +44,13 @@ def decodeString(inputString = ""):
 
 def convertToUnicode(inputString = ""):
 	"""
-	Returns given string as unicode
+	Returns given string as str (unicode)
 
-	@type    string: String
-	@param   string: String to convert to unicode
+	@type    inputString: str or bytes
+	@param   inputString: string to convert to str
 
-	@return:    string in unicode
-	@exception: Exception if converting to unicode failed
+	@return:    string as str
+	@exception: Exception if converting failed
 	"""
 
 	decodedString = ""
@@ -68,8 +68,8 @@ def convertToUnicode(inputString = ""):
 			# ... no integer is okay...
 			pass
 
-		# 2. Check if inputString is unicode...
-		if isinstance(inputString, unicode):
+		# 2. Check if inputString is already str (unicode)...
+		if isinstance(inputString, str):
 			logging.debug("-- unicode")
 			return inputString
 
@@ -87,16 +87,16 @@ def convertToUnicode(inputString = ""):
 
 def convertToUTF8(inputString = ""):
 	"""
-	Returns given string in UTF-8
+	Returns given string as UTF-8 encoded bytes
 
-	@type    string: String
-	@param   string: String to convert to UTF-8
+	@type    inputString: str or bytes
+	@param   inputString: string to convert to UTF-8
 
-	@return:    string in UTF-8
+	@return:    string as UTF-8 encoded bytes
 	@exception: Exception if converting to UTF-8 failed
 	"""
 
-	uft8String = ""
+	utf8String = b""
 	logging.debug("call convertToUTF8('%s')", inputString)
 
 	# nothing to do if inputString is empty
@@ -111,15 +111,15 @@ def convertToUTF8(inputString = ""):
 			except ValueError:
 				pass
 
-			# 2. Check if inputString is unicode...
-			if isinstance(inputString, unicode):
+			# 2. Check if inputString is str (unicode)...
+			if isinstance(inputString, str):
 				logging.debug("-- unicode")
-				# ... then return it as UTF-8
-				uft8String = decodedString.encode('UTF-8')
-				return uft8String
+				# ... then return it encoded as UTF-8
+				utf8String = inputString.encode('UTF-8')
+				return utf8String
 
-			# 2. check given inputString is already UTF-8...
-			decodedString = inputString.decode('UTF-8', 'strict')
+			# 3. check given inputString (bytes) is already UTF-8...
+			inputString.decode('UTF-8', 'strict')
 			# ... no UnicodeDecodeError exception, inputString ist UTF-8
 			logging.debug("-- UTF-8")
 			return inputString
@@ -137,11 +137,11 @@ def convertToUTF8(inputString = ""):
 				# no fixing possible, raise exception
 				raise
 
-			# inputString should now decoded...
+			# inputString should now be decoded...
 
 			try:
 				# encode decodedString to UTF-8
-				uft8String = decodedString.encode('UTF-8')
+				utf8String = decodedString.encode('UTF-8')
 			except:
 				logging.warning("encoding to UTF-8 failed")
 				logging.debug("encoding to UTF-8 failed", exc_info=True)
@@ -150,8 +150,8 @@ def convertToUTF8(inputString = ""):
 
 			# Now we must have an utf8-string, check it:
 			try:
-				uft8String.decode('UTF-8', 'strict')
-				logging.debug("string converting succeeded: %s", uft8String)
+				utf8String.decode('UTF-8', 'strict')
+				logging.debug("string converting succeeded: %s", utf8String)
 			except:
 				logging.warning("converting to UTF-8 failed")
 				logging.debug("converting to UTF-8 failed", exc_info=True)
@@ -166,4 +166,4 @@ def convertToUTF8(inputString = ""):
 			# no fixing possible, raise exception
 			raise
 
-	return uft8String
+	return utf8String
