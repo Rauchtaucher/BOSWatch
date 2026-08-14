@@ -45,7 +45,9 @@ def loadCSV(typ, idField):
 				# only import rows with an integer as id, allow subrics though
 				if re.match("^[0-9A-F]+$", row[idField], re.IGNORECASE):
 					try:
-						resultList[row[idField].lower()] = stringConverter.convertToUTF8(row['description'])
+						# csv.DictReader already returns str (unicode) values in Python 3,
+						# so no additional UTF-8 byte-encoding is necessary here.
+						resultList[row[idField].lower()] = row['description']
 					except:
 						# skip entry in case of an exception
 						pass
